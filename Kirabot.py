@@ -23,7 +23,7 @@ irc = ssl.wrap_socket(irc_C)
 quoteDatabase = ["quote1"]
 f = open("quotes.txt", 'r')
 for line in f:
-    lineNum = len(quoteDatabase)-1
+    lineNum = len(quoteDatabase)
     quoteDatabase[lineNum] = line
 
 
@@ -112,6 +112,9 @@ def processInput(text):
   # respond to message as needed:
   if firstWord == 'hay':
     sendMsg(userName+', hay v:')
+  elif firstWord == 'Kiraquote':
+    quoteIndex = int(restOfText)
+    sendMsg(quoteDatabase[quoteIndex])
   elif firstWord == 'Kirabot,':
   	irc.send(restOfText + "\n")
   elif firstWord == 'sux' !=-1:
@@ -169,7 +172,15 @@ def processInput(text):
 def sendMsg(line):
   # send message to irc channel
   irc.send('PRIVMSG '+channel+' :'+line+' \r\n')
-
+  maxlen = 420 # max. length of message to send. Approximately size where it cuts off 
+  # (428 in tests, but I suspect it depends on the prefixes like "PRIVMSG ..." etc.)
+  explicit_lines = line.split('\n')
+  for el in explicit_lines:
+    while len(el) > 0:
+      cutoff = min(420, len(el))
+      msg = el[0:cutoff]
+      el = el[cutoff:]
+      irc.send('PRIVMSG '+channel+' :'+msg+' \r\n')
   
 def getName(line):
   # assumes format :[name]!blahblah
